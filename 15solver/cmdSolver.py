@@ -16,3 +16,5 @@ def f(x, vals, vars, exp):#vals: [[13,20], [421,2100]], vars: ["[]","[]", x]
     print(exp)
     return eval(exp)
 print(f(14, [[10,14,20], [15, 20], [10, 25]],vars,exp))
+
+#Пока только наброски ВООБЩЕ НЕ ДОДЕЛАНО

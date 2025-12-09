@@ -1,0 +1,147 @@
+@startuml
+title Диаграмма классов решателя игровых задач
+
+class Solver {
+  - _actions: List[str]
+  - _twoHeaps: bool
+  - _winCnt: int
+  - _startCnt: int
+  - _endCnt: int
+  - _otherHeapCnt: int
+  - _forAnyPetya: bool
+  
+  + __init__()
+  + addAction(action_str: str): void
+  + clearActions(): void
+  + changeHeapsCnt(cnt: int): void
+  + changePetyaFlag(): void
+  + setWinCnt(win_cnt: int): void
+  + setInterval(start: int, end: int): void
+  + setOherHeapCnt(otherHeapCnt: int): void
+  + solve(): tuple[List, List, List]
+  - _solve(s, m, flag): bool
+}
+
+abstract class Frame {
+  # frame: ttk.Frame
+  # solver: Solver
+  
+  {abstract} + show(): void
+  {abstract} + bind(): void
+  + forget(): void
+}
+
+class ActionsFrame extends Frame {
+  - possibleActionsLabel: ttk.Label
+  - inputFrame: ttk.Frame
+  - possibleActionsEntry: ttk.Entry
+  - possibleActionsButton: ttk.Button
+  - possibleActionsList: List[ttk.Entry]
+  - anyPetyaCheckBox: ttk.Checkbutton
+  - actionsListFrame: ttk.Frame
+  - startInd: int
+  - clearActionsButton: ttk.Button
+  
+  + __init__(root, solver: Solver)
+  + show(): void
+  + bind(): void
+  - _actionsListFrameOnMousewheel(event): void
+  - _possibleActionButtonClick(solver: Solver): void
+  - _anyPetyaCheckBoxClick(solver: Solver): void
+  - _clearActionsButtonClick(solver: Solver): void
+}
+
+class HeapsFrame extends Frame {
+  - heapsCntFrame: ttk.Frame
+  - heapsCntLabel: ttk.Label
+  - heapsCntVar: tk.StringVar
+  - heapsCntComboBox: ttk.Combobox
+  - otherHeapCntFrame: ttk.Frame
+  - otherHeapCntLabel: ttk.Label
+  - otherHeapCntEntry: ttk.Entry
+  - heapCntDistributionLabel: ttk.Label
+  - heapCntDistributionFrame: ttk.Frame
+  - heapCntDistributionStartLabel: ttk.Label
+  - heapCntDistributionStartEntry: ttk.Entry
+  - heapCntDistributionEndLabel: ttk.Label
+  - heapCntDistributionEndEntry: ttk.Entry
+  - heapCntWinFrame: ttk.Frame
+  - heapCntWinLabel: ttk.Label
+  - heapCntWinEntry: ttk.Entry
+  
+  + __init__(root, solver: Solver)
+  + show(): void
+  + bind(): void
+  - _heapsCntOptionMenuSelect(solver: Solver): void
+}
+
+class AnswerFrame extends Frame {
+  - solveButton: ttk.Button
+  - task19Entry: ttk.Entry
+  - task20Entry: ttk.Entry
+  - task21Entry: ttk.Entry
+  
+  + __init__(root, solver: Solver)
+  + show(): void
+  + bind(): void
+  - _updateEntry(entry: ttk.Entry, text: str): void
+  + _formatAnswer(task_number: int, answer: List): str
+}
+
+class ViewManager {
+  - root: tk.Tk
+  - inputFrame: ttk.Frame
+  - actionsFrame: ActionsFrame
+  - heapsFrame: HeapsFrame
+  - answerFrame: AnswerFrame
+  - solver: Solver
+  
+  + __init__(solver: Solver)
+  + configMainWindow(): void
+  + setStyles(): void
+  + show(): void
+  + bind(): void
+  + update(): void
+  + solve(): void
+}
+
+class SolverApp {
+  - solver: Solver
+  - view: ViewManager
+  
+  + __init__()
+  + run(): void
+  + bind(): void
+}
+
+' Связи композиции
+SolverApp --> Solver : содержит
+SolverApp --> ViewManager : содержит
+
+ViewManager --> ActionsFrame : содержит
+ViewManager --> HeapsFrame : содержит
+ViewManager --> AnswerFrame : содержит
+
+ActionsFrame --> Solver : использует
+HeapsFrame --> Solver : использует
+AnswerFrame --> Solver : использует
+
+
+ViewManager --> tk.Tk : создает
+ViewManager --> ttk.Frame : создает
+ActionsFrame --> ttk.Frame : создает
+HeapsFrame --> ttk.Frame : создает
+AnswerFrame --> ttk.Frame : создает
+
+ActionsFrame --> ttk.Entry : содержит
+ActionsFrame --> ttk.Button : содержит
+ActionsFrame --> ttk.Label : содержит
+ActionsFrame --> ttk.Checkbutton : содержит
+
+HeapsFrame --> ttk.Combobox : содержит
+HeapsFrame --> ttk.Entry : содержит
+HeapsFrame --> ttk.Label : содержит
+
+AnswerFrame --> ttk.Button : содержит
+AnswerFrame --> ttk.Entry : содержит
+@enduml

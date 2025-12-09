@@ -1,0 +1,73 @@
+@startuml
+abstract class TLogElement {
+  - __in1: boolean
+  - __in2: boolean
+  # _res: boolean
+  # _nextEl: TLogElement
+  # _nextIn: int
+  
+  + __init__(nextEl: TLogElement = None, nextIn: int = None)
+  {abstract} # calc(): void
+  - __setIn1(newIn1: boolean): void
+  - __setIn2(newIn2: boolean): void
+  + link(nextEl: TLogElement, nextIn: int): void
+  + In1: boolean <<property>>
+  + In2: boolean <<property>>
+  + Res: boolean <<property>>
+}
+class TNot {
+  + __init__(nextEl: TLogElement = None, nextIn: int = None)
+  # calc(): void
+}
+
+class TRepeat {
+  + __init__(nextEl: TLogElement = None, nextIn: int = None)
+  # calc(): void
+}
+
+abstract class TLog2In {
+  ' Наследует все от TLogElement'
+}
+
+class TAnd {
+  + __init__(nextEl: TLogElement = None, nextIn: int = None)
+  # calc(): void
+}
+
+class TOr {
+  + __init__(nextEl: TLogElement = None, nextIn: int = None)
+  # calc(): void
+}
+
+class TLogDiagram {
+  - __inputs: list[bool]
+  - __logElements: list[TLogElement]
+  - __startElements: list[tuple[int, list[int]]]
+  - __out: bool
+  - __lastElement: int
+  
+  + __init__(inputs_cnt: int = 0)
+  + addInp(newInp: bool): void
+  + getInpCnt(): int
+  + setInp(inp: list[bool]): void
+  + addLogElement(newLogElement: TLogElement): void
+  + addLogElements(newLogElements: list[TLogElement]): void
+  + setLogElement(ind: int, newLogElement: TLogElement): void
+  + addStartElement(ind: int, inputs: list[int]): void
+  + setLastElement(ind: int): void
+  + calc(): void
+  - __getRes(): bool
+  + logElements: list[TLogElement] <<property>>
+  + startElements: list[tuple] <<property>>
+  + lastElement: int <<property>>
+  + inputs: list[bool] <<property>>
+  + out: bool <<property>>
+}
+
+TLogElement <|-- TNot
+TLogElement <|-- TRepeat
+TLogElement <|-- TLog2In
+TLog2In <|-- TAnd
+TLog2In <|-- TOr
+
+@enduml

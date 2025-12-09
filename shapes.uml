@@ -1,0 +1,47 @@
+@startuml
+abstract class Shape {
+  {abstract} + __init__()
+  + __str__(): string
+  {abstract} - __getPerimetr(): float
+  {abstract} - __getArea(): float
+  + perimetr: float {readOnly} <<property>>
+  + area: float {readOnly} <<property>>
+}
+
+class Circle extends Shape {
+  + __init__(r: float)
+  + __str__(): string
+  - __getPerimetr(): float
+  - __getArea(): float
+  + perimetr: float {readOnly} <<property>>
+  + area: float {readOnly} <<property>>
+}
+
+class Rectangle extends Shape {
+  + __init__(side: float)
+  + __str__(): string
+  - __getPerimetr(): float
+  - __getArea(): float
+  - __getDiagonal():float
+  + perimetr: float {readOnly} <<property>>
+  + area: float {readOnly} <<property>>
+  + diagonal: float {readOnly} <<property>>
+}
+
+class Square extends Rectangle {
+  + __init__(side: float)
+  - __getInRadius():float
+  +inRadius: float {readOnly} <<property>>
+}
+
+class Triangle extends Shape {
+  + __init__(sides:list[float])
+  + __str__(): string
+  - __getPerimetr(): float
+  - __getArea(): float
+  - __getInRadius():float
+  + perimetr: float {readOnly} <<property>>
+  + area: float {readOnly} <<property>>
+  +inRadius: float {readOnly} <<property>>
+}
+@enduml

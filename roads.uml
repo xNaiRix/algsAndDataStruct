@@ -1,0 +1,32 @@
+@startuml
+
+class TRoad {
+  - __length: float
+  - __width: float
+  
+  + __init__(length_: float, width_: float)
+  - __getLength(): float
+  - __getWidth(): float
+  + length: float {readOnly} {property}
+  + width: float {readOnly} {property}
+}
+
+class TCar {
+  - __road: TRoad
+  - __p: int
+  - __v: int
+  - __x: float
+  
+  + __init__(road: TRoad, p: int, v: int)
+  + move(): void
+  - __getX(): float
+  - __getP(): int
+  + x: float {readOnly} {property}
+  + p: int {readOnly} {property}
+  + __repr__(): string
+}
+
+TCar --> TRoad :   использует
+
+
+@enduml

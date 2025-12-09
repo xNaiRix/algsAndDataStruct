@@ -1,0 +1,74 @@
+@startuml
+class Point {
+  + x: float
+  + y: float
+  + size: int
+  + color: str
+  
+  + __init__(x, y, size=4, color)
+  + draw(canvas): void
+}
+
+class Line {
+  + x0: float
+  + y0: float
+  + x: float
+  + y: float
+  
+  + __init__(x0, y0, x, y)
+  + draw(canvas): void
+}
+
+class tk.Canvas <<external>> {
+  + create_oval()
+  + create_line()
+  + create_polygon()
+  + create_text()
+  + bind()
+  + pack()
+}
+
+class tk.Button <<external>> {
+  + __init__()
+  + pack()
+}
+
+package "Функции рисования" {
+  class DrawingManager {
+    + user_draw(canvas, object, color="black"): function
+    + set_color(clr, canvas): void
+    + create_random_polygon(canvas): void
+  }
+}
+
+package "Главное приложение" {
+  class GraphicEditor {
+    - main_window: tk.Tk
+    - canvas: tk.Canvas
+    - buttons: list
+    - drawing_manager: DrawingManager
+    
+    + __init__()
+    + setup_ui(): void
+    + bind_events(): void
+    + run(): void
+  }
+}
+
+GraphicEditor --> tk.Canvas : создает и управляет
+GraphicEditor --> tk.Button : создает кнопки
+GraphicEditor --> DrawingManager : использует
+
+Point --> tk.Canvas : рисует на
+Line --> tk.Canvas : рисует на
+
+DrawingManager ..> Point : создает экземпляры
+DrawingManager ..> Line : создает экземпляры
+DrawingManager ..> tk.Canvas : вызывает методы
+
+' Стрелки для зависимостей
+GraphicEditor ..> random : использует для генерации
+GraphicEditor ..> tkinter : импортирует
+
+
+@enduml

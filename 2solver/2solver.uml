@@ -1,0 +1,179 @@
+@startuml
+title Диаграмма классов логического решателя
+
+abstract class Observable {
+  - observers: List[Observable]
+  + __init__(observers: List[Observable]|None)
+  + update(): void
+  + addObserver(observer: Observable): void
+  {abstract} + on_observer_updated(): void
+}
+
+class LogicalFunc extends Observable{
+  - variables: List[str]
+  - string_func: str
+  + __init__()
+  + set_func(func: str): void
+  + calc(p: dict): int|None
+  + __str__(): str
+  + on_observer_updated(): void
+}
+
+
+abstract class View extends Observable{
+  - data: Observable|None
+  - root
+  + __init__(root, data: Observable|None)
+  {abstract} + set(*args, **kwargs): void
+  + show(func: str, *args, **kwargs): void
+  {abstract} + on_observer_updated(): void
+}
+
+class TextView extends View{
+  - view: ttk.Label|None
+  + __init__(data=None)
+  + set(*args, **kwargs): void
+  + on_observer_updated(): void
+}
+
+class LogicalFuncView extends View{
+  - view: ttk.Entry|None
+  + __init__(root)
+  + set(*args, **kwargs): void
+  + changeText(): void
+  + on_observer_updated(): void
+}
+
+class TableView extends View {
+  - data: Table
+  - view: ttk.Treeview
+  - context_menu: tk.Menu|None
+  - selected_item
+  - row_colors: dict
+  - default_bg_color
+  - selection_color: str
+  + __init__(root, data: Table)
+  + set(*args, **kwargs): void
+  + setup_custom_styles(): void
+  + on_double_click(event): void
+  + show_context_menu(event): void
+  + create_context_menu(event): void
+  + change_row_color(): void
+  + set_quick_color(color: str): void
+  + set_row_color(color: str): void
+  + reset_row_color(): void
+  + delete_row(): void
+  + hide_context_menu(): void
+  + on_observer_updated(): void
+}
+
+class Table extends Observable {
+  - _height_cnt: int
+  - _width_cnt: int
+  - _table: List[List]
+  - _headers: List[str]
+  + __init__()
+  + getWidth(): int
+  + getHeight(): int
+  + __str__(): str
+  + __getitem__(index): any
+  + __setitem__(index, item): void
+  + setHeader(index: int, newHeader: str): void
+  + setHeaders(headers: List[str]): void
+  + getHeader(index: int): str
+  + setTable(table): void
+  + getTable(filter): List[tuple]
+  + deleteRow(index: int): void
+  + setHeight(height: int): void
+  + deleteColumn(index: int): void
+  + addRow(row: List, index: int): void
+  + addColumn(index: int, column): void
+  + on_observer_updated(): void
+}
+
+class WholeTruthTable extends Table {
+  - variable_cnt: int
+  - func: LogicalFunc
+  + __init__(func: LogicalFunc)
+  + fillTable(): void
+  + setFunc(func: LogicalFunc): void
+  + on_observer_updated(): void
+}
+
+class InputTruthTable extends Table {
+  - func: LogicalFunc
+  - answers: List[str]
+  + __init__(func: LogicalFunc)
+  + setWidth(): void
+  + calc(): List[str]
+  + on_observer_updated(): void
+}
+
+class AutoTableView extends View {
+  + __init__(root, func: LogicalFunc)
+  + create_table(heightEntry): void
+  + on_double_click(event): void
+  + create_edit_window(item, column_index, column_name, current_value): void
+  + calc(answerLabel): void
+  + on_observer_updated(): void
+}
+
+class HandleTableView extends View {
+  + __init__(root, func: LogicalFunc)
+  + calcTable(filter): void
+  + on_observer_updated(): void
+}
+
+class SolverApp {
+  - root: tk.Tk
+  - FuncFrame: ttk.Frame
+  - HandleSolutionFrame: ttk.Frame
+  - AutoSolutionFrame: ttk.Frame
+  - FuncEntry: LogicalFuncView
+  - FuncButton: ttk.Button
+  - HandleTable: HandleTableView
+  - Show0Button: ttk.Button
+  - Show1Button: ttk.Button
+  - ShowAll: ttk.Button
+  - ThinkLabel: ttk.Label
+  - ThinkText: tk.Text
+  - AutoTable: AutoTableView
+  - AutoSolutionHeightEntry: ttk.Entry
+  - AutoSolutionCreateButton: ttk.Button
+  - AutoSolutionSolveButton: ttk.Button
+  - autoSolutionAnswerLabel: ttk.Label
+  + __init__()
+  + setWindowView(): void
+  + setupFrames(): void
+  + setupFuncFrame(): void
+  + setupHandleSolutionFrame(): void
+  + setupAutoSolutionFrame(): void
+}
+
+LogicalFuncView --> LogicalFunc : содержит
+TableView --> Table : содержит
+AutoTableView --> InputTruthTable : содержит
+HandleTableView --> WholeTruthTable : содержит
+
+SolverApp --> LogicalFuncView : создает
+SolverApp --> HandleTableView : создает
+SolverApp --> AutoTableView : создает
+
+LogicalFuncView ..> Observable : наследует
+LogicalFunc ..> Observable : наследует
+TableView ..> View : наследует
+AutoTableView ..> TableView : наследует
+HandleTableView ..> TableView : наследует
+WholeTruthTable ..> Table : наследует
+InputTruthTable ..> Table : наследует
+
+
+LogicalFunc --> Observable : уведомляет
+LogicalFuncView --> Observable : уведомляет
+HandleTableView --> Observable : уведомляет
+AutoTableView --> Observable : уведомляет
+
+LogicalFunc --> WholeTruthTable : обновляет
+LogicalFunc --> InputTruthTable : обновляет
+
+@enduml

@@ -6,7 +6,7 @@ def get_logger():
 
     detailed_format = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(message)s")
     simple_format = logging.Formatter("%(levelname)s: %(message)s")
-
+    
     file_handler = logging.FileHandler("Transactions.logs", encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(detailed_format)

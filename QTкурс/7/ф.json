@@ -1,0 +1,39 @@
+{
+    "version": "1.0",
+    "scene": {
+        "width": 800.0,
+        "height": 600.0
+    },
+    "shapes": [
+        {
+            "type": "ellipse",
+            "pos": [
+                0.0,
+                0.0
+            ],
+            "props": {
+                "x": 71.0,
+                "y": 85.0,
+                "w": 151.0,
+                "h": 158.0,
+                "color": "black",
+                "stroke_width": 2
+            }
+        },
+        {
+            "type": "rect",
+            "pos": [
+                96.0,
+                97.0
+            ],
+            "props": {
+                "x": 105.0,
+                "y": 113.0,
+                "w": 293.0,
+                "h": 155.0,
+                "color": "black",
+                "stroke_width": 5
+            }
+        }
+    ]
+}

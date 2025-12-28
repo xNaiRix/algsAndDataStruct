@@ -1,0 +1,94 @@
+{
+    "version": "1.0",
+    "scene": {
+        "width": 800.0,
+        "height": 600.0
+    },
+    "shapes": [
+        {
+            "type": "group",
+            "x": 0.0,
+            "y": 0.0,
+            "children": []
+        },
+        {
+            "type": "group",
+            "x": 0.0,
+            "y": 0.0,
+            "children": []
+        },
+        {
+            "type": "group",
+            "x": 0.0,
+            "y": 0.0,
+            "children": []
+        },
+        {
+            "type": "group",
+            "x": 136.0,
+            "y": -22.0,
+            "children": [
+                {
+                    "type": "ellipse",
+                    "pos": [
+                        0.0,
+                        0.0
+                    ],
+                    "props": {
+                        "x": 222.0,
+                        "y": 185.0,
+                        "w": 165.0,
+                        "h": 202.0,
+                        "color": "black",
+                        "stroke_width": 2
+                    }
+                },
+                {
+                    "type": "ellipse",
+                    "pos": [
+                        0.0,
+                        0.0
+                    ],
+                    "props": {
+                        "x": 100.0,
+                        "y": 91.0,
+                        "w": 176.0,
+                        "h": 103.0,
+                        "color": "black",
+                        "stroke_width": 2
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "pos": [
+                0.0,
+                0.0
+            ],
+            "props": {
+                "x": 222.0,
+                "y": 185.0,
+                "w": 165.0,
+                "h": 202.0,
+                "color": "black",
+                "stroke_width": 2
+            }
+        },
+        {
+            "type": "ellipse",
+            "pos": [
+                0.0,
+                0.0
+            ],
+            "props": {
+                "x": 100.0,
+                "y": 91.0,
+                "w": 176.0,
+                "h": 103.0,
+                "color": "black",
+                "stroke_width": 2
+            }
+        }
+    ]
+}

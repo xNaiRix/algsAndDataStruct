@@ -18,6 +18,8 @@ class AbstractShape(ABC):
     @abstractmethod
     def set_geometry(self,start_point:QPointF, end_point:QPointF):
         pass
+
+
 class ShapeMeta(type(QGraphicsPathItem), ABCMeta):
     pass
 
@@ -48,7 +50,9 @@ class Shape(QGraphicsPathItem, AbstractShape, metaclass=ShapeMeta):
         self.current_width = width
         self._setup_pen()
 
-
+    def in_group(self):
+        parent = self.parentItem()
+        return parent is not None and isinstance(parent, QGraphicsItemGroup)
 
 class Rectangle(Shape):
     def __init__(self,x,y,w,h,color="black", stroke_width=2):
@@ -65,7 +69,6 @@ class Rectangle(Shape):
 
     def _create_geometry(self):
         path = QPainterPath()
-        #print("create geometry rect")
         path.addRect(self.x0, self.y0, self.w,self.h)
         self.setPath(path)
 
@@ -179,7 +182,6 @@ class Ellipse(Shape):
         self.h = abs(end_point.y() - start_point.y())
 
         self._create_geometry()
-        #print("geometry_set")
 
 class GroupMeta(type(QGraphicsItemGroup), ABCMeta):
     pass
@@ -211,7 +213,6 @@ class Group(QGraphicsItemGroup, AbstractShape, metaclass=GroupMeta):
 
         if self.current_width != new_width:
             self.current_width = None#считаем, что так, если Mixed
-        print("current w", self.current_width)
         return super().addToGroup(item)        
 
     @property
@@ -236,12 +237,17 @@ class Group(QGraphicsItemGroup, AbstractShape, metaclass=GroupMeta):
     def to_dict(self)->dict:
         children_data = []
         for child in self.childItems():
-            if isinstance(child, Shape):
+            if isinstance(child, (Shape, Group)):
                 children_data.append(child.to_dict())
+
         return {
             "type":self.type_name,
             "x":self.pos().x(),
             "y":self.pos().y(),
             "children": children_data
         }
+
+    def in_group(self):
+        parent = self.parentItem()
+        return parent is not None and isinstance(parent, QGraphicsItemGroup)
 

@@ -159,7 +159,7 @@ class VectorEditorWindow(QMainWindow):
 
         
     def on_save_clicked(self):
-        filters = "Vector Project (*.json);;PNG Image (*.png);;JPEG Image (*.jpg)"
+        filters = "Vector Project (*.vec);;Vector Project (*.json);;PNG Image (*.png);;JPEG Image (*.jpg)"
         filename, selected_filter = QFileDialog.getSaveFileName(
             self, "Save File", "", filters
         )
@@ -209,7 +209,7 @@ class VectorEditorWindow(QMainWindow):
         shapes_data = data.get("shapes", [])
         
         errors_count = 0
-        
+        self.canvas.scene.blockSignals(True)
         for shape_dict in shapes_data:
             try:
                 shape_obj = ShapeFactory.from_dict(shape_dict)
@@ -223,7 +223,9 @@ class VectorEditorWindow(QMainWindow):
             self.statusBar().showMessage(f"Загружено с ошибками ({errors_count} фигур пропущено)")
         else:
             self.statusBar().showMessage(f"Проект загружен: {path}")
-
+        self.canvas.scene.blockSignals(False)
+        self.canvas.scene.update()
+        
     def _setup_layout(self):
         container = QWidget()
         self.setCentralWidget(container)

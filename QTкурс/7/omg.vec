@@ -1,0 +1,105 @@
+{
+    "version": "1.0",
+    "scene": {
+        "width": 800.0,
+        "height": 600.0
+    },
+    "shapes": [
+        {
+            "type": "group",
+            "x": 7.0,
+            "y": 5.0,
+            "children": [
+                {
+                    "type": "group",
+                    "x": 0.0,
+                    "y": 0.0,
+                    "children": [
+                        {
+                            "type": "rect",
+                            "pos": [
+                                -1.0,
+                                0.0
+                            ],
+                            "props": {
+                                "x": 68.0,
+                                "y": 73.0,
+                                "w": 418.0,
+                                "h": 242.0,
+                                "color": "black",
+                                "stroke_width": 2
+                            }
+                        },
+                        {
+                            "type": "rect",
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "props": {
+                                "x": 304.0,
+                                "y": 111.0,
+                                "w": 117.0,
+                                "h": 142.0,
+                                "color": "black",
+                                "stroke_width": 2
+                            }
+                        },
+                        {
+                            "type": "rect",
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "props": {
+                                "x": 120.0,
+                                "y": 117.0,
+                                "w": 112.0,
+                                "h": 135.0,
+                                "color": "black",
+                                "stroke_width": 2
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "group",
+                    "x": -1.0,
+                    "y": 2.0,
+                    "children": [
+                        {
+                            "type": "ellipse",
+                            "pos": [
+                                -15.0,
+                                5.0
+                            ],
+                            "props": {
+                                "x": 342.0,
+                                "y": 311.0,
+                                "w": 153.0,
+                                "h": 134.0,
+                                "color": "black",
+                                "stroke_width": 4
+                            }
+                        },
+                        {
+                            "type": "ellipse",
+                            "pos": [
+                                -8.0,
+                                4.0
+                            ],
+                            "props": {
+                                "x": 116.0,
+                                "y": 312.0,
+                                "w": 146.0,
+                                "h": 131.0,
+                                "color": "black",
+                                "stroke_width": 4
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

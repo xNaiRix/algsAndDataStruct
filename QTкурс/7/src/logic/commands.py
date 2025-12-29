@@ -44,8 +44,6 @@ class MoveCommand(QUndoCommand):
         self.item.setPos(self.old_pos)
 
     def redo(self):
-        print(self.old_pos)
-        print(self.new_pos)
         self.item.setPos(self.new_pos)
 
 class ChangeColorCommand(QUndoCommand):

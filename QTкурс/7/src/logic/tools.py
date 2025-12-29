@@ -69,16 +69,13 @@ class SelectionTool(Tool):
         
         if moved_items:
             self.undo_stack.beginMacro("Move Items")
-            
             for item, old_pos, new_pos in moved_items:
                 cmd = MoveCommand(item, old_pos, new_pos)
                 self.undo_stack.push(cmd)
                 
             self.undo_stack.endMacro()
-            
-        # Очищаем память
         self.item_positions.clear()
-        
+
         item = self.view.itemAt(event.pos())
         if item:
             self.view.setCursor(Qt.OpenHandCursor)
@@ -109,9 +106,7 @@ class CreationTool(Tool):
         #super(type(self.view), self.view).mousePressEvent(event)
 
     def mouse_move(self, event):
-        #print("mouse_move")
         if self.temp_shape and self.start_pos:
-            #print("move [figure_creating]")
             current_pos = self.view.mapToScene(event.pos())
             self.temp_shape.set_geometry(self.start_pos, current_pos)
         #super(type(self.view), self.view).mouseMoveEvent(event)

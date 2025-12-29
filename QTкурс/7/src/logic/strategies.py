@@ -22,9 +22,12 @@ class JsonSaveStrategy(SaveStrategy):
         }
         items = scene.items()[::-1]
         for item in items:
+            print(item)
+            if item.in_group():
+                continue
+            print("done")
             if hasattr(item, "to_dict"):
                 data["shapes"].append(item.to_dict())
-
         FileManager.save_project(filename,data)
     
 class ImageSaveStrategy(SaveStrategy):

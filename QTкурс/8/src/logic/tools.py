@@ -131,7 +131,7 @@ class CreationTool(Tool):
             
             self.delete_shape()
             try:
-                final_shape = ShapeFactory.create_shape(self.shape_type, self.start_pos, current_pos, color="black")
+                final_shape = ShapeFactory.create_shape(self.shape_type, self.start_pos, current_pos, color=self.color)
                 command = AddShapeCommand(self.scene, final_shape)
                 self.undo_stack.push(command)
                 print(f"Command pushed: {command.text()}")
@@ -156,3 +156,4 @@ class CreationTool(Tool):
 
     def set_color(self, color:str)->None:
         self.color = color
+

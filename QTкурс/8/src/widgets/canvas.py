@@ -88,6 +88,7 @@ class EditorCanvas(QGraphicsView):
         for tool in self.tools.values():
             if isinstance(tool, CreationTool):
                 tool.set_color(color)
+            
 
     def delete_selected(self)->None:
         selected = self.scene.selectedItems()

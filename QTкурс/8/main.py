@@ -13,7 +13,7 @@ from src.widgets.canvas import EditorCanvas
 from src.widgets.properties import PropertiesPanel
 from src.logic.strategies import JsonSaveStrategy, ImageSaveStrategy
 from src.logic.factory import ShapeFactory
-from src.config import ToolName, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT
+from src.config import ToolName, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT,DEFAULT_COLOR
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from PySide6.QtWidgets import QToolBar
@@ -52,11 +52,10 @@ class VectorEditorWindow(QMainWindow):
         toolbar = self.addToolBar("Main Toolbar")
         self._setup_tool_buttons(toolbar)
         toolbar.addSeparator()
-        self.btn_clr:"QPushButton" = QPushButton("Color")
-        self.btn_clr.setStyleSheet("background-color: #0f0f0f")
-        toolbar.addWidget(self.btn_clr)
-        self.btn_clr.clicked.connect(self.on_change_color)
-        self.current_color:str = "black"
+        color_action = QAction("Color", self)
+        color_action.setShortcut("Ctrl+U")
+        color_action.triggered.connect(self.on_change_color)
+        self.current_color:str = DEFAULT_COLOR
         self.canvas.set_color(self.current_color)
         
         group_action = QAction("Group", self)
@@ -67,6 +66,7 @@ class VectorEditorWindow(QMainWindow):
         ungroup_action.setShortcut(QKeySequence("Ctrl+U"))
         ungroup_action.triggered.connect(self.canvas.ungroup_selection)
 
+        toolbar.addAction(color_action)
         toolbar.addAction(group_action)
         toolbar.addAction(ungroup_action)
 
@@ -234,6 +234,77 @@ class VectorEditorWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    
+    # Глобальный CSS стиль для всего приложения
+    app.setStyleSheet("""
+        QWidget {
+            color: #ffffff;
+            background-color: #2b2b2b;
+        }
+        
+        QPushButton {
+            background-color: #3c3c3c;
+            border: 1px solid #555555;
+            border-radius: 3px;
+            padding: 5px;
+            color: #ffffff;
+        }
+        
+        QPushButton:hover {
+            background-color: #4a4a4a;
+            border: 1px solid #666666;
+        }
+        
+        QPushButton:checked {
+            background-color: #1e6fb8;
+            border: 1px solid #2a82da;
+        }
+        
+        QPushButton:pressed {
+            background-color: #155a8a;
+        }
+        
+        QFrame {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        
+        QUndoView {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border: 1px solid #555555;
+        }
+        
+        QToolBar {
+            background-color: #2b2b2b;
+            border: none;
+            spacing: 3px;
+        }
+        
+        QMenuBar {
+            background-color: #2b2b2b;
+            color: #ffffff;
+        }
+        
+        QMenuBar::item:selected {
+            background-color: #3c3c3c;
+        }
+        
+        QMenu {
+            background-color: #2b2b2b;
+            color: #ffffff;
+            border: 1px solid #555555;
+        }
+        
+        QMenu::item:selected {
+            background-color: #1e6fb8;
+        }
+        
+        QStatusBar {
+            background-color: #2b2b2b;
+            color: #ffffff;
+        }
+    """)
     window = VectorEditorWindow()
 
     window.show()

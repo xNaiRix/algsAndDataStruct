@@ -6,7 +6,7 @@ from src.logic.shapes import Group
 from src.logic.commands import DeleteShapeCommand
 from src.config import (TOOL_RECT, TOOL_LINE, TOOL_SELECT, TOOL_ELLIPSE, ToolName,
                          TYPE_ELLIPSE, TYPE_RECT, TYPE_LINE,
-                         DEFAULT_SCENE_WIDTH, DEFAULR_SCENE_HEIGHT, BG_COLOR, UNDO_LIMIT
+                         DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT, BG_COLOR, UNDO_LIMIT
                          )
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ class EditorCanvas(QGraphicsView):
         self.setMouseTracking(True)
         self.scene:"QGraphicsScene" = QGraphicsScene(self)
         self.setScene(self.scene)
-        self.scene.setSceneRect(0, 0, DEFAULT_SCENE_WIDTH, DEFAULR_SCENE_HEIGHT) 
+        self.scene.setSceneRect(0, 0, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT) 
         self.setRenderHint(self.renderHints() | QPainter.Antialiasing)
         self.setAlignment(Qt.AlignCenter)
         self.setStyleSheet(f"background-color: {BG_COLOR}")

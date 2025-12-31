@@ -42,7 +42,7 @@ class Solver:
 
         ans = self._minimize_sect()
         return ans
-
+ 
     def _get_correct_exp(self,exp)->tuple[str, list[str], list[str]]:
         ops_to_change = {'^': "and", "|": "or", "||": "or", "&": "and", "&&": "and", "->": "<=", "~": "not"}
         ops = ["and", "or", "not", "<=", "==", "!=", "in", "(", ")"]

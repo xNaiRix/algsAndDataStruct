@@ -1,45 +1,51 @@
 import sys
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
-                               QLabel, QLineEdit, QPushButton, QBoxLayout, QRadioButton, QButtonGroup,
-                               QAbstractButton)
+                               QLabel, QLineEdit, QPushButton, QBoxLayout, QRadioButton, QButtonGroup)
+from PySide6.QtCore import Qt
 
 from logic import Solver, Sector
 from typing import Literal, Callable
 
-class InputSectorsLayout:
-    @staticmethod
-    @property
-    def KNOWNMODE(): return 0
-
-    @staticmethod
-    @property
-    def UNKNOWNMODE(): return 1
+class InputSectorsLayout(QWidget):
+    KNOWNMODE= 0
+    UNKNOWNMODE= 1
     def __init__(self, parent:QBoxLayout, radio_button:QRadioButton, sect_name:str, f:Callable):
+        super().__init__()
+
         self.layout:QHBoxLayout = QHBoxLayout()
         self.radiobutton:QRadioButton = radio_button
         self.sect_name:str = sect_name
         parent.addLayout(self.layout)
         self.layout.addWidget(self.radiobutton)
         self.name_lb = QLabel(self.sect_name)
-        self.layout.addWidget(self.name_lb)
+        self.name_lb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.name_lb.setStyleSheet("background-color: transparent")
+        self.layout.addWidget(self.name_lb, stretch=2)
+        self.layout.addStretch(1)
 
         #known
         self.open_lb = QLabel("[")
+        self.open_lb.setStyleSheet("background-color: transparent")
         self.leftBorder_lnedt = QLineEdit()
         self.sep_lb = QLabel(";")
+        self.sep_lb.setStyleSheet("background-color: transparent")
         self.rightBorder_lnedt = QLineEdit()
         self.close_lb = QLabel("]")
+        self.close_lb.setStyleSheet("background-color: transparent")
 
-        self.layout.addWidget(self.open_lb)
-        self.layout.addWidget(self.leftBorder_lnedt)
-        self.layout.addWidget(self.sep_lb)
-        self.layout.addWidget(self.rightBorder_lnedt)
-        self.layout.addWidget(self.close_lb)
+        self.layout.addWidget(self.open_lb, stretch=1)
+        self.open_lb.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.layout.addWidget(self.leftBorder_lnedt, stretch=2)
+        self.layout.addWidget(self.sep_lb, stretch=0)
+        self.layout.addWidget(self.rightBorder_lnedt, stretch=2)
+        self.layout.addWidget(self.close_lb, stretch=1)
+        self.close_lb.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         #Unknown
         self.find_btn = QPushButton("Найти")
-        self.layout.addWidget(self.find_btn)
+        self.layout.addWidget(self.find_btn, stretch=5)
+        #self.find_btn.setMinimumWidth(800)
         self.find_btn.hide()
         self.find_btn.clicked.connect(lambda : f(self))
         self.mode = self.KNOWNMODE
@@ -157,9 +163,10 @@ class Solver15Window(QMainWindow):
         
     def _connect_buttons(self):
         self.initExp_btn.clicked.connect(self._on_initExp_click)
+        self.exp_lnedt.returnPressed.connect(self.initExp_btn.click)
         self.isKnown_groupBtn.idClicked.connect(lambda btn_id: self._on_changeMode_click(btn_id))
 
-    def _on_initExp_click(self):
+    def _on_initExp_click(self):#ОЧИСТКА ПАМЯТИ!!!
         exp = self.exp_lnedt.text()
         try:
             self.solver.setExp(exp)
@@ -168,6 +175,9 @@ class Solver15Window(QMainWindow):
             buttons = self.isKnown_groupBtn.buttons()
             for button in buttons:
                 self.isKnown_groupBtn.removeButton(button)
+            for key in self.sector_widgets.keys():
+                del self.sector_widgets[key]
+
             
             for i, name in enumerate(sect_names):
                 self.sector_widgets[i] =  InputSectorsLayout(self.inputSectors_layout, QRadioButton(), name, self._on_solve_click)
@@ -204,7 +214,7 @@ class Solver15Window(QMainWindow):
         self.cnt_lnedt.setReadOnly(False)
         self.cnt_lnedt.setText(str(ans.cnt()))
         self.cnt_lnedt.setReadOnly(True)
-
+ 
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
@@ -236,47 +246,11 @@ def main():
         QPushButton:pressed {
             background-color: #155a8a;
         }
-        
         QFrame {
             background-color: #1e1e1e;
             color: #ffffff;
         }
-        
-        QUndoView {
-            background-color: #1e1e1e;
-            color: #ffffff;
-            border: 1px solid #555555;
-        }
-        
-        QToolBar {
-            background-color: #2b2b2b;
-            border: none;
-            spacing: 3px;
-        }
-        
-        QMenuBar {
-            background-color: #2b2b2b;
-            color: #ffffff;
-        }
-        
-        QMenuBar::item:selected {
-            background-color: #3c3c3c;
-        }
-        
-        QMenu {
-            background-color: #2b2b2b;
-            color: #ffffff;
-            border: 1px solid #555555;
-        }
-        
-        QMenu::item:selected {
-            background-color: #1e6fb8;
-        }
-        
-        QStatusBar {
-            background-color: #2b2b2b;
-            color: #ffffff;
-        }
+
     """)
     window = Solver15Window()
 

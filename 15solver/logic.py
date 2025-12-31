@@ -23,7 +23,7 @@ class Solver:
     
     def setExp(self, exp:str)->None:
         self.exp, running_variables, self.sectors_in_exp = self._get_correct_exp(exp)
-        if len(running_variables) != 1: raise ValueError("Фигню а не выражение вы подали, господа")
+        if len(running_variables) != 1: raise ValueError("Incorrect expression")
         self.running_variable = running_variables[0]
 
 
@@ -70,7 +70,7 @@ class Solver:
         for sect_name in self.sectors_in_exp:
             if sect_name not in self.sector_variables:
                 names.append(sect_name)
-        if len(names) != 1: raise ValueError("Фигню а не выражение вы подали, господа")
+        if len(names) != 1: raise ValueError("Incorrect expression")
         return names[0]
     
     def _check_num(self, running_variables:dict[str, int|float], sector_variables:dict[str, Sector])->bool:
@@ -84,7 +84,8 @@ class Solver:
         try:
             ans = eval(new_exp)
         except Exception as e:
-            print(e)
+            print("Error in Solver._check_num", e)
+            raise e
         return ans
     
     def _get_bad_values(self)->list[float|int]:#чек всех x
@@ -101,8 +102,8 @@ class Solver:
             if sect[0] not in self.possible_borders_values or sect[1] not in self.possible_borders_values:
                 return False
         except Exception as e:
-            print(e)
-            return False
+            print("Error in Solver._check_sect:", e)
+            raise e
         sector_variables = self.sector_variables
         sector_variables[self.running_sector] = sect
         return all(self._check_num(running_variables={self.running_variable: val}, sector_variables=sector_variables) for val in self.possible_values)
@@ -115,7 +116,7 @@ class Solver:
                 if self._check_sect(sector):
                     sectors.append(sector)
         sectors = sorted(sectors, key = lambda x: x.size())
-        if len(sectors) == 0: raise RuntimeError("Произошла какая-то хрень в поиске минимального отрезка")
+        if len(sectors) == 0: raise RuntimeError("Error while finding minimal Sector")
         return sectors[0]
 
 
@@ -125,9 +126,11 @@ class Solver:
 # exp = "( x in A ) or ( x in B and x in C )"#input()
 # print(eval(exp.replace("x", "14")))
 
-s = Solver()
-exp = "(x in D) -> ( ( (not (x in C)) and (not (x in A)) ) -> (not (x in D)))"
-s.setExp(exp)
-sectors = {"D": Sector([17, 58]),
-           "C":Sector([29, 80])}
-print(s.solve(sectors))
+if __name__ == "__main__":
+    s = Solver()
+    exp = "(x in D) -> ( ( (not (x in C)) and (not (x in A)) ) -> (not (x in D)))"
+    #exp = "x in A))"
+    s.setExp(exp)
+    sectors = {"D": Sector([17, 58]),
+            "C":Sector([29, 80])}
+    print(s.solve(sectors))

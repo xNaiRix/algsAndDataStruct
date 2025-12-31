@@ -1,7 +1,7 @@
 import sys
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
-                               QLabel, QLineEdit, QPushButton, QBoxLayout, QRadioButton, QButtonGroup)
+                               QLabel, QLineEdit, QPushButton, QRadioButton, QButtonGroup)
 from PySide6.QtCore import Qt
 
 from logic import Solver, Sector
@@ -10,13 +10,12 @@ from typing import Literal, Callable
 class InputSectorsLayout(QWidget):
     KNOWNMODE= 0
     UNKNOWNMODE= 1
-    def __init__(self, parent:QBoxLayout, radio_button:QRadioButton, sect_name:str, f:Callable):
+    def __init__(self, radio_button:QRadioButton, sect_name:str, f:Callable):
         super().__init__()
 
-        self.layout:QHBoxLayout = QHBoxLayout()
+        self.layout:QHBoxLayout = QHBoxLayout(self)
         self.radiobutton:QRadioButton = radio_button
         self.sect_name:str = sect_name
-        parent.addLayout(self.layout)
         self.layout.addWidget(self.radiobutton)
         self.name_lb = QLabel(self.sect_name)
         self.name_lb.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -166,27 +165,37 @@ class Solver15Window(QMainWindow):
         self.exp_lnedt.returnPressed.connect(self.initExp_btn.click)
         self.isKnown_groupBtn.idClicked.connect(lambda btn_id: self._on_changeMode_click(btn_id))
 
-    def _on_initExp_click(self):#ОЧИСТКА ПАМЯТИ!!!
+    def _on_initExp_click(self):
         exp = self.exp_lnedt.text()
+        print(exp)
         try:
             self.solver.setExp(exp)
-            self.sector_widgets = {}
-            sect_names = self.solver.getSectorNames()
+            print(self.solver.exp)
+        except Exception as e:
+            print("some error with setting exp:", e)
+            return
+        try:
             buttons = self.isKnown_groupBtn.buttons()
             for button in buttons:
                 self.isKnown_groupBtn.removeButton(button)
-            for key in self.sector_widgets.keys():
-                del self.sector_widgets[key]
+                button.setParent(None)
+                button.deleteLater()
+            for widget in self.sector_widgets.values():
+                self.inputSectors_layout.removeWidget(widget)
+                widget.setParent(None)
+                widget.deleteLater()
 
-            
+            self.sector_widgets.clear()
+
+            sect_names = self.solver.getSectorNames()
             for i, name in enumerate(sect_names):
-                self.sector_widgets[i] =  InputSectorsLayout(self.inputSectors_layout, QRadioButton(), name, self._on_solve_click)
+                self.sector_widgets[i] =  InputSectorsLayout(QRadioButton(), name, self._on_solve_click)
+                self.inputSectors_layout.addWidget(self.sector_widgets[i])
                 self.isKnown_groupBtn.addButton(self.sector_widgets[i].radiobutton, i)
                 self.sector_widgets[i].setMode(InputSectorsLayout.KNOWNMODE)
 
-            #######
         except Exception as e:
-            print("some error with setting exp:", e)
+            print("some error in setting sector widgets:", e)
 
     def _on_changeMode_click(self, btn_id:int):
         print("id", btn_id)
@@ -217,7 +226,6 @@ class Solver15Window(QMainWindow):
  
 def main():
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
     
     app.setStyleSheet("""
         QWidget {

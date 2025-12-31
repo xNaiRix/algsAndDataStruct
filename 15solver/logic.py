@@ -8,14 +8,25 @@ class Sector(list):
     def size(self)->int:
         if len(self) == 0: return 0
         return max(self) - min(self)
-
+    def cnt(self, step:float=1):
+        if step <= 0: return 0
+        return (max(self) - min(self) + 1)//step
 
 class Solver:
-    def __init__(self, exp:str):
-        self.eps = 0.001
+    def __init__(self):
+        self.eps:float = 0.001
+        self.exp:str = ""
+        self.sectors_in_exp: list[str] = list()
+        self.running_variable:str = ""
+
+    def getSectorNames(self)->list[str]: return self.sectors_in_exp
+    
+    def setExp(self, exp:str)->None:
         self.exp, running_variables, self.sectors_in_exp = self._get_correct_exp(exp)
         if len(running_variables) != 1: raise ValueError("Фигню а не выражение вы подали, господа")
-        self.running_variable:str = running_variables[0]
+        self.running_variable = running_variables[0]
+
+
 
     def solve(self, sector_variables:dict[str, Sector])->Sector:
         self.sector_variables = sector_variables
@@ -32,7 +43,7 @@ class Solver:
         ans = self._minimize_sect()
         return ans
 
-    def _get_correct_exp(self,exp)->tuple[str, list, list]:
+    def _get_correct_exp(self,exp)->tuple[str, list[str], list[str]]:
         ops_to_change = {'^': "and", "|": "or", "||": "or", "&": "and", "&&": "and", "->": "<=", "~": "not"}
         ops = ["and", "or", "not", "<=", "==", "!=", "in", "(", ")"]
         new_exp = exp
@@ -114,8 +125,9 @@ class Solver:
 # exp = "( x in A ) or ( x in B and x in C )"#input()
 # print(eval(exp.replace("x", "14")))
 
-s = Solver("(x in D) -> ( ( (not (x in C)) and (not (x in A)) ) -> (not (x in D)))")
+s = Solver()
+exp = "(x in D) -> ( ( (not (x in C)) and (not (x in A)) ) -> (not (x in D)))"
+s.setExp(exp)
 sectors = {"D": Sector([17, 58]),
            "C":Sector([29, 80])}
 print(s.solve(sectors))
-#Ещё совсем не доделано

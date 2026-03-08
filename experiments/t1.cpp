@@ -1,4 +1,7 @@
-// #include <iostream>
+#include <iostream>
+int main(){
+    std::cout<< "Hi!";
+}
 // #include <format>
 
 // int main(){

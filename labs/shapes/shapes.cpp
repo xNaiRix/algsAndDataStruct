@@ -5,8 +5,8 @@
 using namespace std;
 class Shape {
 public:
-    float virtual get_area();
-    float virtual get_perimetr();
+    float virtual get_area()=0;
+    float virtual get_perimetr()=0;
     //virtual ~Shape() = default;
 };
 class Circle : public Shape {

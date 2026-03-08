@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random> 
 #include <ctime>  
+#include <memory>
 struct Player {
     int x = 1;
     int y = 1;
@@ -100,16 +101,16 @@ class Key: public Cell {
 };
 
 class Map{
-    Cell* grid[10][10];
+    std::unique_ptr<Cell> grid[10][10];
 public:
     Map(){
         for(int i = 0; i < 10; ++i){
-            grid[i][0] = new Wall();
+            grid[i][0] = std::make_unique<Wall>();
             if (i != 0){
-                grid[0][i] = new Wall();
-                grid[9][i] = new Wall();
+                grid[0][i] = std::make_unique<Wall>();
+                grid[9][i] = std::make_unique<Wall>();
                 if (i != 9){
-                    grid[i][9] = new Wall();
+                    grid[i][9] = std::make_unique<Wall>();
                 }
             }
         }
@@ -117,31 +118,24 @@ public:
             for (int j = 1; j < 9; ++j){
                 int chance = std::rand() % 100;
                 if (chance < 10) {
-                    grid[i][j] = new Gold();
+                    grid[i][j] = std::make_unique<Gold>();
                 }
                 else if (chance < 25) {
-                    grid[i][j] = new Trap();
+                    grid[i][j] = std::make_unique<Trap>();
                 }
                 else if (chance < 35) {
-                    grid[i][j] = new Door();
+                    grid[i][j] = std::make_unique<Door>();
                 }
                 else if (chance < 40) {
-                    grid[i][j] = new Key();
+                    grid[i][j] = std::make_unique<Key>();
                 }
                 else {
-                    grid[i][j] = new Floor();
+                    grid[i][j] = std::make_unique<Floor>();
                 }
             }
         }
     }
 
-    ~Map(){
-        for(int i = 0; i < 10; ++i){
-            for (int j = 0; j < 10; ++j){
-                delete grid[i][j];
-            }
-        }
-    }
     void draw(const Player& p) const {
         for (int i = 0; i < 10; ++i){
             for(int j = 0; j < 10; ++j){
@@ -176,8 +170,7 @@ int main() {
     char input;
 
     while (player.hp > 0) {
-        // Очистка консоли (для Windows: "clds", для Linux/Mac: "clear")
-        system("cls"); // или system("cls");
+        system("cls");
 
         std::cout << "HP: " << player.hp << " | Gold: " << 
         player.gold << " | hasKEY: " <<player.hasKey << "\n";

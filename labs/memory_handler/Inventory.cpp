@@ -44,6 +44,15 @@ public:
         }
         return *(data + index);
     }
+    const int& operator[] (int index) const {
+        if (index >= size){
+            throw std::out_of_range(
+                    "Inventory out of range."
+                );
+        }
+        return *(data + index);
+    }
+
 
     void add(int newItem){
         if (size == capacity){

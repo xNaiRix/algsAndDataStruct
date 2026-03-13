@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-
+#include<format>
 
 class Dimension
 {
@@ -73,24 +73,20 @@ std::ostream& operator<<(
         return out;
 }
 
+class Quantity;
 
 class Unit
 {
     std::string name;// короткое имя: "m", "kg", "s"
     Dimension dim;
     double factor;// коэффициент перевода в SI
+    friend class Quantity;
  public:
     Unit() = default;
     Unit(std::string name,
          const Dimension& dim,
          double factor = 1.):
          name(name), factor(factor), dim(dim){}
-    Dimension getDim() const{
-        return this->dim;
-    }
-    double getFactor() const{
-        return this->factor;
-    }
     template<typename T>
     T calcValueSi(const T& value) const {
         return value * this->factor;
@@ -112,7 +108,18 @@ class Quantity
          valueSI(valueSI), dim(dim){}
     Quantity(double value,
         const Unit& unit):
-    valueSI(unit.calcValueSi(value)), dim(unit.getDim()){}
+    valueSI(unit.calcValueSi(value)), dim(unit.dim){}
+    std::string printWithDim(const Unit& unit) const{
+        if (this->dim != unit.dim)
+        {
+            return "Ошибка: величину нельзя вывести"
+              " в этой единице!";
+        }
+
+        double value = this->valueSI / unit.factor;
+        return std::format("{} {}", value, unit.name);
+    }
+
 
     Quantity operator-() const{
         double new_valueSI = -this->valueSI;
@@ -125,7 +132,8 @@ class Quantity
         Quantity operator+(const Quantity& other ) const{
         if (this->dim != other.dim)
         {
-            std::cout << "Ошибка: нельзя складывать величины разных размерностей!" << std::endl;
+            std::cout << "Ошибка: нельзя складывать"
+            " величины разных размерностей!" << std::endl;
             exit(1);
         }
 
@@ -154,7 +162,8 @@ class Quantity
     Quantity operator/(const Quantity& other ) const{
          if (other.valueSI == 0)
         {
-            std::cout << "Ошибка: деление на ноль!" << std::endl;
+            std::cout << "Ошибка: деление на ноль!" 
+            << std::endl;
             exit(1);
         }
         Quantity result;
@@ -176,17 +185,59 @@ class Quantity
 
 std::ostream& operator<<(
         std::ostream& out, const Quantity& q){
-            out << "valyeSI = " << q.valueSI << ' '
-                << "dim: = (" << q.dim << ")";
+            out << q.valueSI << ' '
+                <<  q.dim;
         return out;
-}
+    }
 
-int main()
-{
+void tests(){
+    Unit meter = Unit("m", Dimension(0, 1, 0), 1.0);
+    Unit centimeter = Unit("cm", Dimension(0, 1, 0), 0.01);
+    Unit second = {"s", Dimension(0, 0, 1), 1.0};
+    Unit kilogramm = {"kg", Dimension(1, 0, 0), 1.0};
+    Unit meters_in_second = {"m/s", Dimension(0, 1, -1)};
+    Unit meters_in_second_in_second = 
+        {"m/s^2", Dimension(0, 1, -2)};
+    Unit newtons = {"N", Dimension(1, 1, -2)};
+    Unit meter_cub = {"m^3", Dimension(0, 3, 0)};
+    Unit kilogramms_in_meter_cub = 
+        {"kg/m^3", Dimension(1, -3, 0)};
+    std::cout <<std::endl << "2 m + 30 cm = " << 
+    (Quantity(2., meter) + Quantity(30, centimeter)).
+    printWithDim(meter);
+
+    // std::cout <<std::endl << "2 kg + 3s = " << 
+    // (Quantity(2., kilogramm) + Quantity(3., second)).
+    // printWithDim(second);
+
+    std::cout <<std::endl << "100 m / 20 s = " << 
+    (Quantity(100., meter) / Quantity(20, second)).
+    printWithDim(meters_in_second);
+
+    std::cout <<std::endl << "10 m/s / 2 s = " << 
+    (Quantity(10., meters_in_second) / Quantity(2, second)).
+        printWithDim(meters_in_second_in_second);
+
+    std::cout <<std::endl << "2 kg *  5 m/s^2 = " << 
+    (Quantity(2., kilogramm) * 
+        Quantity(5, meters_in_second_in_second)).
+        printWithDim(newtons);
+
+    std::cout <<std::endl << "4 kg /  0.002 m^3 = " << 
+    (Quantity(4., kilogramm) /
+        Quantity(0.002, meter_cub)).
+        printWithDim(kilogramms_in_meter_cub);//
+    
+    std:: cout << std::endl<<"Tests done! Also need to"
+            " check answers";
+
+}
+int main() {
     setlocale(LC_ALL, "ru");
     Unit meter = Unit("m", Dimension(0, 1, 0), 1.0);
     Unit centimeter = Unit("cm", Dimension(0, 1, 0), 0.01);
     Unit second = {"s", Dimension(0, 0, 1), 1.0};
+    Unit kilogramm = {"kg", Dimension(1, 0, 0), 1.0};
 
     Quantity a = Quantity(2.0, meter);
     Quantity b = Quantity(200.0, centimeter);
@@ -200,6 +251,11 @@ int main()
     std::cout<< "v: " << v << std::endl;
     // std::cout << a << std::endl; // 2
     // std::cout << b << std::endl; // 2
+
+    Quantity x = Quantity(250.0, Unit("cm", Dimension(0,1,0), 0.01));
+    std::cout << x.printWithDim( Unit("m", Dimension(0,1,0), 1.0));// 2.5 m
+
+    tests();
 
     return 0;
 }

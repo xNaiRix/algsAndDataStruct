@@ -2,6 +2,7 @@
 #include <string>
 #include<format>
 #include <map>
+#include <vector>
 #include <stdexcept>
 
 class Dimension
@@ -9,11 +10,12 @@ class Dimension
     int m;
     int l;
     int t;
+    int i;
     friend std::ostream& operator<<(
         std::ostream& out, const Dimension& dim);
  public:
-    Dimension(int m, int l, int t):
-     m(m), l(l), t(t){}
+    Dimension(int m, int l, int t, int i = 0):
+     m(m), l(l), t(t), i(i){}
     Dimension()=default;
     
     const bool operator== (const Dimension& other) const{
@@ -160,6 +162,9 @@ class Quantity
         (*this) = (*this) / other;
         return (*this);
     }
+    bool isEqualDim(const Unit& unit) const{
+        return this->dim == unit.dim;
+    }
 
 
 };
@@ -175,7 +180,6 @@ class UnitsMapCollection: public std::map<std::string, Unit>{
     void insertUnit(const Unit& unit){
         (*this)[unit.getName()] = unit;
     }
-    public:
     void initUnits(){
         this->insertUnit(Unit("m", Dimension(0, 1, 0), 1.0));
         this->insertUnit(Unit("cm", Dimension(0, 1, 0), 0.01));
@@ -186,19 +190,124 @@ class UnitsMapCollection: public std::map<std::string, Unit>{
         this->insertUnit(Unit("N", Dimension(1, 1, -2)));
         this->insertUnit(Unit("m^3", Dimension(0, 3, 0)));
         this->insertUnit(Unit("kg/m^3", Dimension(1, -3, 0)));
+        this->insertUnit(Unit("J", Dimension(1, 2, -2)));
+        this->insertUnit(Unit("W", Dimension(1, 2, -3)));
+        this->insertUnit(Unit("A", Dimension(0, 0, 0, 1)));
+        this->insertUnit(Unit("q", Dimension(0, 0, 1, 1)));
+        this->insertUnit(Unit("V", Dimension(1, 2, -3, -1)));
+        this->insertUnit(Unit("Om", Dimension(1, 2, -3, -2)));
     }
-    
+ public:
+    UnitsMapCollection(){this->initUnits();}
+    std::vector<std::string> getShortNames(){
+        std::vector<std::string> short_names;
+        for (const auto& [key, value] : (*this)){
+            short_names.push_back(key);
+        }
+        return short_names;
+    }
+};
+
+class Formuls{
+    UnitsMapCollection units;
+
+ public:
+    Quantity calcSpeed(const Quantity& s, const Quantity& t){
+        if (!s.isEqualDim(units.at("m"))){
+            throw std::logic_error("'s' must be space dim");
+        }
+        if (!t.isEqualDim(units.at("s"))){
+            throw std::logic_error("'t' must be time dim");
+        }
+        return s/t;
+    }
+    Quantity calcAccelaration(const Quantity& v, const Quantity& t){
+        if (!v.isEqualDim(units.at("m/s"))){
+            throw std::logic_error("'v' must be speed dim");
+        }
+        if (!t.isEqualDim(units.at("s"))){
+            throw std::logic_error("'t' must be time dim");
+        }
+        return v/t;
+    }
+    Quantity calcForce(const Quantity& m, const Quantity& a){
+        if (!m.isEqualDim(units.at("kg"))){
+            throw std::logic_error("'m' must be mass dim");
+        }
+        if (!a.isEqualDim(units.at("m/s^2"))){
+            throw std::logic_error("'a' must be accelaration dim");
+        }
+        return m*a;
+    }
+    Quantity calcWork(const Quantity& F, const Quantity s){
+        if (!F.isEqualDim(units.at("N"))){
+            throw std::logic_error("'F' must be force dim");
+        }
+        if (!s.isEqualDim(units.at("m"))){
+            throw std::logic_error("'s' must be space dim");
+        }
+        return F*s;
+    }
+    Quantity calcPower(const Quantity& A, const Quantity t){
+        if (!A.isEqualDim(units.at("J"))){
+            throw std::logic_error("'A' must be energy dim");
+        }
+        if (!t.isEqualDim(units.at("s"))){
+            throw std::logic_error("'t' must be time dim");
+        }
+        return A/t;
+    }
+
+    Quantity calcCharge(const Quantity& I, const Quantity t){
+        if (!I.isEqualDim(units.at("A"))){
+            throw std::logic_error("'I' must be amperage dim");
+        }
+        if (!t.isEqualDim(units.at("s"))){
+            throw std::logic_error("'t' must be time dim");
+        }
+        return I*t;
+    }
+    Quantity calcVoltage(const Quantity& A, const Quantity q){
+        if (!A.isEqualDim(units.at("J"))){
+            throw std::logic_error("'A' must be energy dim");
+        }
+        if (!q.isEqualDim(units.at("q"))){
+            throw std::logic_error("'q' must be charge dim");
+        }
+        return A/q;
+    }
+    Quantity calcResistance(const Quantity& U, const Quantity I){
+        if (!U.isEqualDim(units.at("V"))){
+            throw std::logic_error("'V' must be voltage dim");
+        }
+        if (!I.isEqualDim(units.at("I"))){
+            throw std::logic_error("'I' must be amperage dim");
+        }
+        return U/I;
+    }
+    Quantity calcElectricityPower(const Quantity& U, const Quantity I){
+        if (!U.isEqualDim(units.at("V"))){
+            throw std::logic_error("'V' must be voltage dim");
+        }
+        if (!I.isEqualDim(units.at("I"))){
+            throw std::logic_error("'I' must be amperage dim");
+        }
+        return U*I;
+    }
+
+
 };
 UnitsMapCollection units;
+Formuls formuls;
 
 void tests(){
     std::cout <<std::endl << "2 m + 30 cm = " << 
     (Quantity(2., units.at("m")) + Quantity(30, units.at("cm"))).
     valueWithDim(units.at("m"));
 
-    // std::cout <<std::endl << "2 kg + 3s = " << 
-    // (Quantity(2., units.at("kg")) + Quantity(3., units.at("s"))).
-    // valueWithDim(units.at("s"));
+    std::cout <<std::endl << "2 kg + 3s = " << 
+    (Quantity(2., units.at("kg")) + Quantity(3., units.at("s"))).
+    valueWithDim(units.at("s"));
 
     std::cout <<std::endl << "100 m / 20 s = " << 
     (Quantity(100., units.at("m")) / 
@@ -245,10 +354,17 @@ void run(){
 
 int main() {
     setlocale(LC_ALL, "ru");
-    units.initUnits();
-
-    tests();
-    run();
+    //formuls = Formuls(units);
+    auto names = units.getShortNames();
+    for (auto& c: names){
+        std::cout << c << '\n';
+    }
+    Quantity s = Quantity(3200, units.at("cm"));
+    Quantity t = Quantity(20, units.at("s"));
+    Quantity v = formuls.calcSpeed(s, t);
+    std::cout << v.valueWithDim(units.at("m/s"));
+    //tests();
+    //run();
 
     return 0;
 }

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <optional>
 #include <numbers>
+#include<stdexcept>
 #include <format>
 
 // Предварительные объявления
@@ -196,6 +197,9 @@ void fourPointsOnCircle(Point A, Point B, Point C, Point D){
             CD = C|D;
             O_opt = AB & CD;
             std::cout << "\nPoints A becomes C, C becomes D, D becomes A to not be parallel\n";
+            if (!O_opt){
+                throw std::invalid_argument("Bad points");
+            }
         }
         else{
             std::cout << "\nPoints A and C changed there order to not be parallel\n";
@@ -210,11 +214,13 @@ void fourPointsOnCircle(Point A, Point B, Point C, Point D){
     std::cout << std::boolalpha;
     std::cout << "AO/OC = " << AO.length() / OC.length();
     std::cout << "\nOD/OB = " << OD.length() / OB.length();
+    double d = AO.length() / OC.length() - OD.length() / OB.length();
+    std::cout << "\ndict = " << d << '\n';
     Circle circle {A,B,C};
     std::cout << "\ncircle (ABC) contains D: " << circle.contains(D);
     std::cout <<  "\n\nTheorem about 4 points on circle is correct: " << 
-         ((abs(AO.length() / OC.length() - OD.length() / OB.length() )< 1e-5 ) == circle.contains(D))
-         <<std::endl<<std::endl<<std::endl;
+         ((std::abs(d) < 1e-5 ) == circle.contains(D))
+         << std::endl<<std::endl<<std::endl;
 
 
 }
@@ -226,6 +232,8 @@ int main() {
     Point D = Point(40,-30);
     std::cout << "\n==============LAB===============\n";
     fourPointsOnCircle(A,B,C,D);
+    fourPointsOnCircle(A,B,B,D);
+    fourPointsOnCircle(A,B,B,C);
     A = {0, 100};
     fourPointsOnCircle(A,B,C,D);
     A = {50,60};

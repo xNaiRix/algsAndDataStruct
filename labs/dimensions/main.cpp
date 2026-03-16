@@ -2,7 +2,7 @@
 #include "Quantity.h"
 #include "UnitsMapCollection.h"
 #include "Formuls.h"
-
+//g++ -g (Resolve-Path *.cpp) -o program -std=c++20 -Iinclude  
 UnitsMapCollection units;
 Formuls formuls;
 

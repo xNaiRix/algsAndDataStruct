@@ -14,6 +14,7 @@ private:
     std::vector<std::unique_ptr<Actor>> actors_;
     int currentStep_;
     int maxSteps_;
+    mutable Money initialTotalMoney_;
 
     // Actor pointers for special interactions
     Homer* homer_;

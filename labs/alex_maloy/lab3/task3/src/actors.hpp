@@ -5,6 +5,8 @@
 #include <string>
 #include <random>
 
+class Apu;
+
 // Base actor class
 class Actor
 {
@@ -49,9 +51,12 @@ private:
     Money transferToMargePerStep_;
     Money electricityBillPerStep_;
     Money cashToChildrenPerStep_;
+    Actor* bart_;
+    Actor* lisa_;
 
 public:
     Homer(Bank* bank);
+    void SetChildren(Actor* bart, Actor* lisa);
     void Step() override;
 };
 
@@ -72,11 +77,11 @@ class Bart : public Actor
 {
 private:
     Money spendingPerStep_;
-    AccountId apuAccountId_;
+    Apu* apu_;
     std::mt19937 rng_;
 
 public:
-    Bart(Bank* bank, AccountId apuAccountId);
+    Bart(Bank* bank, Apu* apu);
     void Step() override;
 };
 
@@ -85,11 +90,11 @@ class Lisa : public Actor
 {
 private:
     Money spendingPerStep_;
-    AccountId apuAccountId_;
+    Apu* apu_;
     std::mt19937 rng_;
 
 public:
-    Lisa(Bank* bank, AccountId apuAccountId);
+    Lisa(Bank* bank, Apu* apu);
     void Step() override;
 };
 
@@ -137,10 +142,11 @@ public:
     AccountId apuAccountId_;
 
 private:
+    Apu* apu_;
     std::mt19937 rng_;
 
 public:
-    Nelson(Bank* bank, Money maxStealAmount = 50);
+    Nelson(Bank* bank, Apu* apu, Money maxStealAmount = 50);
     void Step() override;
 };
 
@@ -154,10 +160,11 @@ public:
     AccountId apuAccountId_;
 
 private:
+    Apu* apu_;
     std::mt19937 rng_;
 
 public:
-    Snake(Bank* bank, Money maxHackAmount = 100);
+    Snake(Bank* bank, Apu* apu, Money maxHackAmount = 100);
     void Step() override;
 };
 

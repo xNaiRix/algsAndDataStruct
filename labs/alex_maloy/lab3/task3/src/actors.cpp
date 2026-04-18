@@ -45,16 +45,16 @@ void Actor::ReceiveCashPayment(Money amount)
 
 void Actor::PrintStatus() const
 {
-    std::cout << "  " << name_ << ": Cash=" << cashHeld_;
+    std::cout << "  " << name_ << ": Наличные=" << cashHeld_;
     try
     {
-        std::cout << ", Account Balance=" << bank_->GetAccountBalance(accountId_);
+        std::cout << ", Баланс счета=" << bank_->GetAccountBalance(accountId_);
     }
     catch (const BankOperationError&)
     {
-        std::cout << ", Account=CLOSED";
+        std::cout << ", Счет=ЗАКРЫТ";
     }
-    std::cout << ", Total=" << GetTotalMoney() << std::endl;
+    std::cout << ", Всего=" << GetTotalMoney() << std::endl;
 }
 
 // ===== HOMER SIMPSON =====
@@ -64,74 +64,85 @@ Homer::Homer(Bank* bank)
       salaryPerStep_(1000),
       transferToMargePerStep_(300),
       electricityBillPerStep_(200),
-      cashToChildrenPerStep_(100)
+      cashToChildrenPerStep_(100),
+      bart_(nullptr),
+      lisa_(nullptr)
 {
+}
+
+void Homer::SetChildren(Actor* bart, Actor* lisa)
+{
+    bart_ = bart;
+    lisa_ = lisa;
 }
 
 void Homer::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
-    // Receive salary from Burns (happens in Burns' step)
-    // So we just have cash here
-
-    // Try to transfer money to Marge via bank
     try
     {
         if (cashHeld_ >= transferToMargePerStep_)
         {
             bank_->DepositMoney(accountId_, transferToMargePerStep_);
             cashHeld_ -= transferToMargePerStep_;
-            std::cout << "  Homer transfers " << transferToMargePerStep_
-                      << " to Marge's account" << std::endl;
+            std::cout << "  Гомер переводит " << transferToMargePerStep_
+                      << " на счет Мардж" << std::endl;
         }
         else
         {
-            std::cout << "  Homer: Not enough cash to transfer to Marge" << std::endl;
+            std::cout << "  Гомер: Недостаточно наличных для перевода Мардж" << std::endl;
         }
     }
     catch (const std::exception& e)
     {
-        std::cout << "  Homer: Transfer to Marge failed: " << e.what() << std::endl;
+        std::cout << "  Гомер: Перевод Мардж не удался: " << e.what() << std::endl;
     }
 
-    // Pay electricity bill
     try
     {
         if (cashHeld_ >= electricityBillPerStep_)
         {
             bank_->DepositMoney(accountId_, electricityBillPerStep_);
             cashHeld_ -= electricityBillPerStep_;
-            std::cout << "  Homer pays " << electricityBillPerStep_
-                      << " for electricity" << std::endl;
+            std::cout << "  Гомер платит " << electricityBillPerStep_
+                      << " за электричество" << std::endl;
         }
         else
         {
-            std::cout << "  Homer: Not enough cash to pay electricity" << std::endl;
+            std::cout << "  Гомер: Недостаточно наличных для оплаты электричества" << std::endl;
         }
     }
     catch (const std::exception& e)
     {
-        std::cout << "  Homer: Electricity payment failed: " << e.what() << std::endl;
+        std::cout << "  Гомер: Оплата электричества не удалась: " << e.what() << std::endl;
     }
 
-    // Give cash to children
     try
     {
         if (cashHeld_ >= cashToChildrenPerStep_)
         {
+            Money childShare = cashToChildrenPerStep_ / 2;
             cashHeld_ -= cashToChildrenPerStep_;
-            std::cout << "  Homer gives " << cashToChildrenPerStep_
-                      << " cash to children" << std::endl;
+            if (bart_)
+            {
+                bart_->ReceiveCashPayment(childShare);
+            }
+            if (lisa_)
+            {
+                lisa_->ReceiveCashPayment(cashToChildrenPerStep_ - childShare);
+            }
+            std::cout << "  Гомер дает " << cashToChildrenPerStep_
+                      << " наличными детям" << std::endl;
         }
         else
         {
-            std::cout << "  Homer: Not enough cash for children" << std::endl;
+            std::cout << "  Гомер: Недостаточно наличных для детей" << std::endl;
         }
     }
     catch (const std::exception& e)
     {
-        std::cout << "  Homer: Failed to give cash to children: " << e.what() << std::endl;
+        std::cout << "  Гомер: Не удалось дать наличные детям: " << e.what() << std::endl;
     }
 }
 
@@ -146,7 +157,7 @@ Marge::Marge(Bank* bank, AccountId apuAccountId)
 
 void Marge::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
     // Buy groceries from Apu via bank transfer
     try
@@ -154,35 +165,34 @@ void Marge::Step()
         if (bank_->GetAccountBalance(accountId_) >= groceryExpensePerStep_)
         {
             bank_->SendMoney(accountId_, apuAccountId_, groceryExpensePerStep_);
-            std::cout << "  Marge buys groceries from Apu for " << groceryExpensePerStep_
-                      << " via transfer" << std::endl;
+            std::cout << "  Мардж покупает продукты у Апу за " << groceryExpensePerStep_
+                      << " через перевод" << std::endl;
         }
         else
         {
-            std::cout << "  Marge: Not enough funds in account for groceries" << std::endl;
+            std::cout << "  Мардж: Недостаточно средств на счете для продуктов" << std::endl;
         }
     }
     catch (const std::exception& e)
     {
-        std::cout << "  Marge: Grocery purchase failed: " << e.what() << std::endl;
+        std::cout << "  Мардж: Покупка продуктов не удалась: " << e.what() << std::endl;
     }
 }
 
 // ===== BART SIMPSON =====
 
-Bart::Bart(Bank* bank, AccountId apuAccountId)
+Bart::Bart(Bank* bank, Apu* apu)
     : Actor("Bart", bank, 0),
       spendingPerStep_(30),
-      apuAccountId_(apuAccountId),
+      apu_(apu),
       rng_(std::random_device{}())
 {
 }
 
 void Bart::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
-    // Randomly decide to spend some cash on Apu's store
     std::uniform_int_distribution<int> spend_dist(0, 100);
     if (spend_dist(rng_) < 60)  // 60% chance to buy something
     {
@@ -190,27 +200,30 @@ void Bart::Step()
         if (cashHeld_ >= amount)
         {
             cashHeld_ -= amount;
-            std::cout << "  Bart buys something from Apu for " << amount
-                      << " cash" << std::endl;
+            if (apu_)
+            {
+                apu_->ReceiveCashPayment(amount);
+            }
+            std::cout << "  Барт покупает что-то у Апу за " << amount
+                      << " наличными" << std::endl;
         }
     }
 }
 
 // ===== LISA SIMPSON =====
 
-Lisa::Lisa(Bank* bank, AccountId apuAccountId)
+Lisa::Lisa(Bank* bank, Apu* apu)
     : Actor("Lisa", bank, 0),
       spendingPerStep_(20),
-      apuAccountId_(apuAccountId),
+      apu_(apu),
       rng_(std::random_device{}())
 {
 }
 
 void Lisa::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
-    // Randomly decide to spend some cash on Apu's store (less often than Bart)
     std::uniform_int_distribution<int> spend_dist(0, 100);
     if (spend_dist(rng_) < 40)  // 40% chance to buy something
     {
@@ -218,8 +231,12 @@ void Lisa::Step()
         if (cashHeld_ >= amount)
         {
             cashHeld_ -= amount;
-            std::cout << "  Lisa buys something from Apu for " << amount
-                      << " cash" << std::endl;
+            if (apu_)
+            {
+                apu_->ReceiveCashPayment(amount);
+            }
+            std::cout << "  Лиза покупает что-то у Апу за " << amount
+                      << " наличными" << std::endl;
         }
     }
 }
@@ -236,7 +253,7 @@ Apu::Apu(Bank* bank, AccountId burnsAccountId)
 
 void Apu::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
     // Try to pay electricity bill to Burns
     try
@@ -244,8 +261,8 @@ void Apu::Step()
         if (bank_->GetAccountBalance(accountId_) >= electricityBillPerStep_)
         {
             bank_->SendMoney(accountId_, burnsAccountId_, electricityBillPerStep_);
-            std::cout << "  Apu pays " << electricityBillPerStep_
-                      << " for electricity to Burns" << std::endl;
+            std::cout << "  Апу платит " << electricityBillPerStep_
+                      << " за электричество Бернсу" << std::endl;
         }
         else if (cashHeld_ >= electricityBillPerStep_)
         {
@@ -253,16 +270,16 @@ void Apu::Step()
             bank_->DepositMoney(accountId_, electricityBillPerStep_);
             cashHeld_ -= electricityBillPerStep_;
             bank_->SendMoney(accountId_, burnsAccountId_, electricityBillPerStep_);
-            std::cout << "  Apu deposits and pays electricity bill" << std::endl;
+            std::cout << "  Апу вносит и платит за электричество" << std::endl;
         }
         else
         {
-            std::cout << "  Apu: Not enough funds to pay electricity" << std::endl;
+            std::cout << "  Апу: Недостаточно средств для оплаты электричества" << std::endl;
         }
     }
     catch (const std::exception& e)
     {
-        std::cout << "  Apu: Electricity payment failed: " << e.what() << std::endl;
+        std::cout << "  Апу: Оплата электричества не удалась: " << e.what() << std::endl;
     }
 
     // Deposit cash to account if it exceeds threshold
@@ -273,11 +290,11 @@ void Apu::Step()
             Money depositAmount = cashHeld_ - (depositThresholdCash_ / 2);
             bank_->DepositMoney(accountId_, depositAmount);
             cashHeld_ -= depositAmount;
-            std::cout << "  Apu deposits " << depositAmount << " cash to bank" << std::endl;
+            std::cout << "  Апу вносит " << depositAmount << " наличными в банк" << std::endl;
         }
         catch (const std::exception& e)
         {
-            std::cout << "  Apu: Deposit failed: " << e.what() << std::endl;
+            std::cout << "  Апу: Внесение не удалось: " << e.what() << std::endl;
         }
     }
 }
@@ -299,36 +316,24 @@ Burns::Burns(Bank* bank, AccountId homerAccountId)
 
 void Burns::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
-    // Receive revenue from electricity sales (just add to account)
     try
     {
-        bank_->DepositMoney(accountId_, revenuePerStep_);
-        cashHeld_ += revenuePerStep_;  // Actually get cash, not deposit
-        std::cout << "  Burns receives " << revenuePerStep_
-                  << " from electricity sales" << std::endl;
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << "  Burns: Revenue collection failed: " << e.what() << std::endl;
-    }
-
-    // Pay Homer's salary
-    try
-    {
-        if (cashHeld_ >= salaryForHomer_)
+        if (bank_->TryWithdrawMoney(accountId_, salaryForHomer_))
         {
-            cashHeld_ -= salaryForHomer_;
-            // Give Homer cash directly (not via bank)
-            // This will be handled in a separate step
-            std::cout << "  Burns gives " << salaryForHomer_
-                      << " salary to Homer (as cash)" << std::endl;
+            cashHeld_ += salaryForHomer_;
+            std::cout << "  Бернс снимает " << salaryForHomer_
+                      << " со своего счета для оплаты Гомеру" << std::endl;
+        }
+        else
+        {
+            std::cout << "  Бернс: Недостаточно средств на счете для оплаты зарплаты" << std::endl;
         }
     }
     catch (const std::exception& e)
     {
-        std::cout << "  Burns: Salary payment failed: " << e.what() << std::endl;
+        std::cout << "  Бернс: Снятие зарплаты не удалось: " << e.what() << std::endl;
     }
 }
 
@@ -339,18 +344,20 @@ void Burns::ReceiveElectricityPayment(Money amount)
 
 // ===== NELSON (BONUS) =====
 
-Nelson::Nelson(Bank* bank, Money maxStealAmount)
+Nelson::Nelson(Bank* bank, Apu* apu, Money maxStealAmount)
     : Actor("Nelson", bank, 0),
       stealAttemptChance_(0.4),
       maxStealAmount_(maxStealAmount),
+      bartAccountId_(0),
       apuAccountId_(0),
+      apu_(apu),
       rng_(std::random_device{}())
 {
 }
 
 void Nelson::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
     // Try to steal from Bart (random chance)
     std::uniform_real_distribution<double> chance_dist(0.0, 1.0);
@@ -358,8 +365,8 @@ void Nelson::Step()
     {
         std::uniform_int_distribution<Money> steal_dist(10, maxStealAmount_);
         Money stealAmount = steal_dist(rng_);
-        std::cout << "  Nelson tries to steal " << stealAmount
-                  << " from Bart (but this is a simulation!)" << std::endl;
+        std::cout << "  Нельсон пытается украсть " << stealAmount
+                  << " у Барта (но это симуляция!)" << std::endl;
     }
 
     // Buy cigarettes from Apu with whatever cash Nelson has
@@ -367,25 +374,30 @@ void Nelson::Step()
     {
         Money spent = 20;
         cashHeld_ -= spent;
-        std::cout << "  Nelson buys cigarettes from Apu for " << spent << std::endl;
+        if (apu_)
+        {
+            apu_->ReceiveCashPayment(spent);
+        }
+        std::cout << "  Нельсон покупает сигареты у Апу за " << spent << std::endl;
     }
 }
 
 // ===== SNAKE (BONUS) =====
 
-Snake::Snake(Bank* bank, Money maxHackAmount)
+Snake::Snake(Bank* bank, Apu* apu, Money maxHackAmount)
     : Actor("Snake", bank, 0),
       hackChance_(0.3),
       maxHackAmount_(maxHackAmount),
       homerAccountId_(0),
       apuAccountId_(0),
+      apu_(apu),
       rng_(std::random_device{}())
 {
 }
 
 void Snake::Step()
 {
-    std::cout << "\n--- " << name_ << "'s turn ---" << std::endl;
+    std::cout << "\n--- Ход " << name_ << " ---" << std::endl;
 
     // Try to hack Homer's account (random chance)
     std::uniform_real_distribution<double> chance_dist(0.0, 1.0);
@@ -403,7 +415,7 @@ void Snake::Step()
                 if (bank_->TrySendMoney(homerAccountId_, accountId_, hackAmount))
                 {
                     cashHeld_ += hackAmount;
-                    std::cout << "  Snake hacks Homer's account and steals "
+                    std::cout << "  Снейк взламывает счет Гомера и крадет "
                               << hackAmount << std::endl;
                 }
             }
@@ -411,22 +423,23 @@ void Snake::Step()
         catch (const std::exception& e)
         {
             // Hack attempt failed
-            std::cout << "  Snake's hack failed" << std::endl;
+            std::cout << "  Взлом Снейка не удался" << std::endl;
         }
     }
 
     // Buy from Apu with cash
-    if (cashHeld_ >= 30 && apuAccountId_ != 0)
+    if (cashHeld_ >= 30 && apu_)
     {
         try
         {
             Money spent = 30;
             cashHeld_ -= spent;
-            std::cout << "  Snake buys from Apu for " << spent << " cash" << std::endl;
+            apu_->ReceiveCashPayment(spent);
+            std::cout << "  Снейк покупает у Апу за " << spent << " наличными" << std::endl;
         }
         catch (const std::exception& e)
         {
-            std::cout << "  Snake: Purchase failed: " << e.what() << std::endl;
+            std::cout << "  Снейк: Покупка не удалась: " << e.what() << std::endl;
         }
     }
 }
